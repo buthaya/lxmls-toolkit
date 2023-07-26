@@ -1,4 +1,5 @@
 import numpy as np
+
 from lxmls.deep_learning.mlp import MLP
 from lxmls.deep_learning.utils import index2onehot, logsumexp
 
@@ -41,8 +42,36 @@ class NumpyMLP(MLP):
 
     def log_forward(self, input):
         """Forward pass for sigmoid hidden layers and output softmax"""
-        
-        
+
+        # Input
+        tilde_z = input
+        layer_inputs = []
+
+        # Hidden layers
+        num_hidden_layers = len(self.parameters) - 1
+        for n in range(num_hidden_layers):
+
+            # Store input to this layer (needed for backpropagation)
+            layer_inputs.append(tilde_z)
+
+            # Linear transformation
+            weight, bias = self.parameters[n]
+            z = np.dot(tilde_z, weight.T) + bias
+
+            # Non-linear transformation (sigmoid)
+            tilde_z = 1.0 / (1 + np.exp(-z))
+
+        # Store input to this layer (needed for backpropagation)
+        layer_inputs.append(tilde_z)
+
+        # Output linear transformation
+        weight, bias = self.parameters[num_hidden_layers]
+        z = np.dot(tilde_z, weight.T) + bias
+
+        # Softmax is computed in log-domain to prevent underflow/overflow
+        log_tilde_z = z - logsumexp(z, axis=1, keepdims=True)
+
+        return log_tilde_z, layer_inputs
 
     def cross_entropy_loss(self, input, output):
         """Cross entropy loss"""
@@ -66,7 +95,6 @@ class NumpyMLP(MLP):
 
         # ----------
         # Solution to Exercise 2.2
-
 
         # End of solution to Exercise 2.2
         # ----------
