@@ -41,36 +41,8 @@ class NumpyMLP(MLP):
 
     def log_forward(self, input):
         """Forward pass for sigmoid hidden layers and output softmax"""
-
-        # Input
-        tilde_z = input
-        layer_inputs = []
-
-        # Hidden layers
-        num_hidden_layers = len(self.parameters) - 1
-        for n in range(num_hidden_layers):
-
-            # Store input to this layer (needed for backpropagation)
-            layer_inputs.append(tilde_z)
-
-            # Linear transformation
-            weight, bias = self.parameters[n]
-            z = np.dot(tilde_z, weight.T) + bias
-
-            # Non-linear transformation (sigmoid)
-            tilde_z = 1.0 / (1 + np.exp(-z))
-
-        # Store input to last layer
-        layer_inputs.append(tilde_z)
-
-        # Output linear transformation
-        weight, bias = self.parameters[num_hidden_layers]
-        z = np.dot(tilde_z, weight.T) + bias
-
-        # Softmax is computed in log-domain to prevent underflow/overflow
-        log_tilde_z = z - logsumexp(z, axis=1, keepdims=True)
-
-        return log_tilde_z, layer_inputs
+        
+        
 
     def cross_entropy_loss(self, input, output):
         """Cross entropy loss"""
@@ -93,48 +65,10 @@ class NumpyMLP(MLP):
         errors = []
 
         # ----------
-        # Solution to Exercise 3.2
+        # Solution to Exercise 2.2
 
-        # Initial error is the cost derivative at the last layer (for cross
-        # entropy cost)
-        I = index2onehot(output, num_clases)
-        error = (prob_y - I) / num_examples
-        errors.append(error)
 
-        # Backpropagate through each layer
-        for n in reversed(range(num_hidden_layers)):
-
-            # Backpropagate through linear layer
-            error = np.dot(error, self.parameters[n+1][0])
-
-            # Backpropagate through sigmoid layer
-            error *= layer_inputs[n+1] * (1-layer_inputs[n+1])
-
-            # Collect error
-            errors.append(error)
-
-        # Reverse errors
-        errors = errors[::-1]
-
-        # Compute gradients from errors
-        gradients = []
-        for n in range(num_hidden_layers + 1):
-
-            # Weight gradient
-            weight_gradient = np.zeros(self.parameters[n][0].shape)
-            for l in range(num_examples):
-                weight_gradient += np.outer(
-                    errors[n][l, :],
-                    layer_inputs[n][l, :]
-                )
-
-            # Bias gradient
-            bias_gradient = np.sum(errors[n], axis=0, keepdims=True)
-
-            # Store gradients
-            gradients.append([weight_gradient, bias_gradient])
-
-        # End of solution to Exercise 3.2
+        # End of solution to Exercise 2.2
         # ----------
 
         return gradients
