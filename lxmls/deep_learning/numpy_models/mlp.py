@@ -39,7 +39,7 @@ class NumpyMLP(MLP):
             # Update bias
             self.parameters[m][1] -= learning_rate * gradients[m][1]
 
-        def log_forward(self, input):
+    def log_forward(self, input):
         """Forward pass for sigmoid hidden layers and output softmax"""
 
         # Input
@@ -71,8 +71,6 @@ class NumpyMLP(MLP):
         log_tilde_z = z - logsumexp(z, axis=1, keepdims=True)
 
         return log_tilde_z, layer_inputs
-        
-        
 
     def cross_entropy_loss(self, input, output):
         """Cross entropy loss"""
@@ -96,7 +94,6 @@ class NumpyMLP(MLP):
 
         # ----------
         # Solution to Exercise 2.2
-        
 
         # End of solution to Exercise 2.2
         # ----------
